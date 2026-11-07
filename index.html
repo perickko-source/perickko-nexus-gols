@@ -238,44 +238,72 @@
   });
 </script>
 
-<!-- === BARREDOR QUIRÚRGICO SEGURO === -->
+<!-- === SOLUCIÓN DEFINITIVA: OCULTAR SOLO CONTROLES NATIVOS === -->
+<style>
+  /* Ocultar SOLO los controles táctiles de EmulatorJS */
+  .ejs_dpad,
+  .ejs_dpad_container,
+  .ejs_button,
+  .ejs_button_container,
+  .ejs_gamepad,
+  .ejs_touchControls,
+  .ejs_controlBtn,
+  .ejs_menuBtn,
+  .ejs_volumeBtn,
+  .ejs_fastForwardBtn,
+  .ejs_rewindBtn,
+  .ejs_saveStateBtn,
+  .ejs_loadStateBtn,
+  .ejs_screenshotBtn,
+  .ejs_restartBtn,
+  .ejs_pauseBtn,
+  .ejs_muteBtn,
+  .ejs_cheatBtn,
+  .ejs_settingsBtn,
+  .ejs_fullscreenBtn,
+  .ejs_menu {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+</style>
+
 <script>
 (function(){
-  function limpiar(){
+  // Esperar a que el emulador cargue
+  function ocultarControles() {
     var wrap = document.getElementById('emulator-wrapper');
-    if(!wrap) return;
+    if (!wrap) return;
     
-    // 1. Forzar que el canvas del juego sea siempre visible y esté al frente
-    var canvas = wrap.querySelector('canvas');
-    if(canvas) {
-        canvas.style.setProperty('display', 'block', 'important');
-        canvas.style.setProperty('visibility', 'visible', 'important');
-        canvas.style.setProperty('opacity', '1', 'important');
-        canvas.style.setProperty('position', 'absolute', 'important');
-        canvas.style.setProperty('top', '0', 'important');
-        canvas.style.setProperty('left', '0', 'important');
-        canvas.style.setProperty('width', '100%', 'important');
-        canvas.style.setProperty('height', '100%', 'important');
-        canvas.style.setProperty('z-index', '50', 'important');
+    // Buscar SOLO elementos con clases de EmulatorJS
+    var controles = wrap.querySelectorAll('[class*="ejs"]');
+    for (var i = 0; i < controles.length; i++) {
+      var el = controles[i];
+      // Solo ocultar si es un botón o contenedor de controles
+      if (el.className.indexOf('button') !== -1 || 
+          el.className.indexOf('dpad') !== -1 || 
+          el.className.indexOf('control') !== -1 ||
+          el.className.indexOf('menu') !== -1 ||
+          el.className.indexOf('volume') !== -1) {
+        el.style.setProperty('display', 'none', 'important');
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
+      }
     }
-
-    // 2. Ocultar SOLO los elementos de la interfaz de EmulatorJS
-    wrap.querySelectorAll('*').forEach(function(el){
-        var cls = (el.className || '').toString().toLowerCase();
-        var id = (el.id || '').toString().toLowerCase();
-        // Si es un elemento de la interfaz de EmulatorJS, lo ocultamos
-        if(cls.includes('ejs') || cls.includes('dpad') || cls.includes('button') || id.includes('ejs')) {
-            el.style.setProperty('display', 'none', 'important');
-        }
-    });
   }
   
-  // Ejecutar al cargar y vigilar cambios dinámicos
-  limpiar();
-  var obs = new MutationObserver(limpiar);
-  obs.observe(document.body, {childList:true, subtree:true});
-  setInterval(limpiar, 500);
+  // Ejecutar cada 500ms durante los primeros 10 segundos
+  var intentos = 0;
+  var intervalo = setInterval(function() {
+    ocultarControles();
+    intentos++;
+    if (intentos > 20) clearInterval(intervalo);
+  }, 500);
 })();
+</script>
 </script>
 </body>
 </html>
