@@ -6,10 +6,10 @@
 <title>NEXUS - Master System</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{background:#111;display:flex;justify-content:center;align-items:center;
+  body{background:#373737;display:flex;justify-content:center;align-items:center;
        min-height:100vh;font-family:Arial,sans-serif;overflow:hidden;user-select:none}
-  #console-container{position:relative;width:1280px;height:720px;max-width:100vw;max-height:100vh}
-  #skin{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
+    #console-container{position:relative;height:100vh;width:auto;aspect-ratio:16/9;max-width:100vw}
+  #skin{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;object-fit:contain}
 #emulator-wrapper {
   left: 18.31%;
   top: 10.11%;
@@ -154,10 +154,35 @@
   background: transparent;
   border-radius: 40%;
 }
-
+/* Botón pantalla completa */
+#fullscreen-btn {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  z-index: 500;
+  background: rgba(255,68,68,0.9);
+  color: #000;
+  border: none;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+#fullscreen-btn:hover { background: #ff6666; }
 </style>
 </head>
 <body>
+
+<!-- Aviso de orientación -->
+<div id="rotate-notice">
+  <div class="rotate-box">
+    <div class="rotate-icon">📱➡️</div>
+    <p>Gira el dispositivo para jugar en <b>horizontal</b></p>
+    <button id="rotate-ok">¡Entendido!</button>
+  </div>
+</div>
 
 <div id="console-container">
   <img id="skin" src="skin.png" alt="NEXUS">
@@ -305,5 +330,38 @@
 })();
 </script>
 </script>
+<!-- Botón de pantalla completa -->
+<button id="fullscreen-btn">⛶ Pantalla completa</button>
+
+<script>
+// === AVISO DE ORIENTACIÓN ===
+(function(){
+  var notice = document.getElementById('rotate-notice');
+  var btnOk = document.getElementById('rotate-ok');
+  if (notice && btnOk) {
+    btnOk.addEventListener('click', function(){
+      notice.classList.add('hidden');
+    });
+  }
+})();
+
+// === PANTALLA COMPLETA ===
+(function(){
+  var btn = document.getElementById('fullscreen-btn');
+  if (!btn) return;
+  btn.addEventListener('click', function(){
+    var doc = document.documentElement;
+    if (!document.fullscreenElement) {
+      if (doc.requestFullscreen) doc.requestFullscreen();
+      else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+      else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
