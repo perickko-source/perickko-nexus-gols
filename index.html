@@ -154,6 +154,19 @@
   background: transparent;
   border-radius: 40%;
 }
+/* === OCULTAR CONTROLES NATIVOS DE EMULATORJS === */
+.ejs_dpad,
+.ejs_button,
+.ejs_gamepad,
+.ejs_touchControls,
+.ejs_controlBtn,
+.ejs_button_container,
+.ejs_dpad_container {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
 </style>
 </head>
 <body>
