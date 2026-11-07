@@ -238,35 +238,44 @@
   });
 </script>
 
-<!-- === BARREDOR DE CONTROLES NATIVOS === -->
+<!-- === BARREDOR QUIRÚRGICO SEGURO === -->
 <script>
 (function(){
   function limpiar(){
     var wrap = document.getElementById('emulator-wrapper');
     if(!wrap) return;
-    // Recorre TODOS los elementos dentro de la pantalla
+    
+    // 1. Forzar que el canvas del juego sea siempre visible y esté al frente
+    var canvas = wrap.querySelector('canvas');
+    if(canvas) {
+        canvas.style.setProperty('display', 'block', 'important');
+        canvas.style.setProperty('visibility', 'visible', 'important');
+        canvas.style.setProperty('opacity', '1', 'important');
+        canvas.style.setProperty('position', 'absolute', 'important');
+        canvas.style.setProperty('top', '0', 'important');
+        canvas.style.setProperty('left', '0', 'important');
+        canvas.style.setProperty('width', '100%', 'important');
+        canvas.style.setProperty('height', '100%', 'important');
+        canvas.style.setProperty('z-index', '50', 'important');
+    }
+
+    // 2. Ocultar SOLO los elementos de la interfaz de EmulatorJS
     wrap.querySelectorAll('*').forEach(function(el){
-      var tag = el.tagName.toLowerCase();
-      // Si no es el canvas del juego, lo ocultamos y desactivamos
-      if(tag !== 'canvas' && !el.querySelector('canvas')){
-        el.style.setProperty('display','none','important');
-        el.style.setProperty('visibility','hidden','important');
-        el.style.setProperty('pointer-events','none','important');
-      }
+        var cls = (el.className || '').toString().toLowerCase();
+        var id = (el.id || '').toString().toLowerCase();
+        // Si es un elemento de la interfaz de EmulatorJS, lo ocultamos
+        if(cls.includes('ejs') || cls.includes('dpad') || cls.includes('button') || id.includes('ejs')) {
+            el.style.setProperty('display', 'none', 'important');
+        }
     });
   }
   
-  // Ejecutar al cargar
+  // Ejecutar al cargar y vigilar cambios dinámicos
   limpiar();
-  
-  // Vigilar si el emulador intenta añadir botones nuevos dinámicamente
   var obs = new MutationObserver(limpiar);
   obs.observe(document.body, {childList:true, subtree:true});
-  
-  // Repasar cada medio segundo por seguridad
   setInterval(limpiar, 500);
 })();
 </script>
-
 </body>
 </html>
