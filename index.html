@@ -154,19 +154,7 @@
   background: transparent;
   border-radius: 40%;
 }
-/* === OCULTAR CONTROLES NATIVOS DE EMULATORJS === */
-.ejs_dpad,
-.ejs_button,
-.ejs_gamepad,
-.ejs_touchControls,
-.ejs_controlBtn,
-.ejs_button_container,
-.ejs_dpad_container {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
+
 </style>
 </head>
 <body>
@@ -204,6 +192,8 @@
   var EJS_gameUrl = URL.createObjectURL(b64toBlob(romTxt));
   var EJS_player = "#emulator-wrapper";
   var EJS_core = "segaMS";
+  var EJS_VirtualGamepadSettings = [];
+  var EJS_defaultOptions = { "virtual-gamepad": "disabled" };
   var EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/";
   var EJS_startOnLoaded = true;
   var EJS_Buttons = {playPause:false,restart:false,mute:false,settings:false,
@@ -246,6 +236,36 @@
     btn.addEventListener('touchend', up, {passive:false});
     btn.addEventListener('touchcancel', up, {passive:false});
   });
+</script>
+
+<!-- === BARREDOR DE CONTROLES NATIVOS === -->
+<script>
+(function(){
+  function limpiar(){
+    var wrap = document.getElementById('emulator-wrapper');
+    if(!wrap) return;
+    // Recorre TODOS los elementos dentro de la pantalla
+    wrap.querySelectorAll('*').forEach(function(el){
+      var tag = el.tagName.toLowerCase();
+      // Si no es el canvas del juego, lo ocultamos y desactivamos
+      if(tag !== 'canvas' && !el.querySelector('canvas')){
+        el.style.setProperty('display','none','important');
+        el.style.setProperty('visibility','hidden','important');
+        el.style.setProperty('pointer-events','none','important');
+      }
+    });
+  }
+  
+  // Ejecutar al cargar
+  limpiar();
+  
+  // Vigilar si el emulador intenta añadir botones nuevos dinámicamente
+  var obs = new MutationObserver(limpiar);
+  obs.observe(document.body, {childList:true, subtree:true});
+  
+  // Repasar cada medio segundo por seguridad
+  setInterval(limpiar, 500);
+})();
 </script>
 
 </body>
