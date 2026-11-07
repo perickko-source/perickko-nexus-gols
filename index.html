@@ -42,7 +42,7 @@
   .overlay{position:fixed;inset:0;background:#373737;z-index:9000;
        display:flex;flex-direction:column;justify-content:center;align-items:center;
        text-align:center;padding:20px}
-  .overlay.oculto{display:none}
+  .overlay.oculto{display:none!important}
   .rotate-box{background:#222;border:2px solid #ff4444;border-radius:16px;
        padding:30px 40px;max-width:420px;color:#fff}
   .rotate-icon{font-size:58px;margin-bottom:14px}
@@ -80,6 +80,7 @@
   <button class="ctrl-btn" id="btn-start"></button>
 </div>
 
+<!-- Pantalla 1: Aviso de orientación -->
 <div id="ov-rotate" class="overlay">
   <div class="rotate-box">
     <div class="rotate-icon">📱➡️</div>
@@ -88,6 +89,7 @@
   </div>
 </div>
 
+<!-- Pantalla 2: Botón pantalla completa -->
 <div id="ov-full" class="overlay oculto">
   <button class="btn-rojo" id="btn-fullscreen">⛶ PANTALLA COMPLETA</button>
 </div>
@@ -117,14 +119,41 @@
 <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
 
 <script>
+  // === 1. DETECCIÓN INTELIGENTE DE ORIENTACIÓN ===
   var ovRotate = document.getElementById('ov-rotate');
   var ovFull   = document.getElementById('ov-full');
+  var yaIniciado = false;
+
+  function esHorizontal() {
+    if (window.matchMedia) {
+      return window.matchMedia("(orientation: landscape)").matches;
+    }
+    return window.innerWidth > window.innerHeight;
+  }
+
+  function actualizarPantallas() {
+    if (yaIniciado) return;
+    if (esHorizontal()) {
+      ovRotate.classList.add('oculto');
+      ovFull.classList.remove('oculto');
+    } else {
+      ovRotate.classList.remove('oculto');
+      ovFull.classList.add('oculto');
+    }
+  }
+
+  actualizarPantallas();
+  window.addEventListener('resize', actualizarPantallas);
+  window.addEventListener('orientationchange', function(){
+    setTimeout(actualizarPantallas, 100);
+  });
 
   document.getElementById('btn-rotate-ok').addEventListener('click', function(){
     ovRotate.classList.add('oculto');
     ovFull.classList.remove('oculto');
   });
 
+  // === 2. BOTÓN DE PANTALLA COMPLETA ===
   document.getElementById('btn-fullscreen').addEventListener('click', function(){
     var d = document.documentElement;
     try{
@@ -132,13 +161,16 @@
       else if(d.webkitRequestFullscreen) d.webkitRequestFullscreen();
       else if(d.msRequestFullscreen) d.msRequestFullscreen();
     }catch(e){}
+
     if(screen.orientation && screen.orientation.lock){
       try{ screen.orientation.lock('landscape'); }catch(e){}
     }
+
+    yaIniciado = true;
     ovFull.classList.add('oculto');
-    setTimeout(function(){ window.dispatchEvent(new Event('resize')); }, 400);
   });
 
+  // === 3. CONTROLES DEL EMULADOR ===
   var PAD={B:0,Y:1,SELECT:2,START:3,UP:4,DOWN:5,LEFT:6,RIGHT:7,A:8,X:9};
   var mapa={
     'btn-up':PAD.UP,'btn-down':PAD.DOWN,'btn-left':PAD.LEFT,'btn-right':PAD.RIGHT,
@@ -167,14 +199,14 @@
     btn.addEventListener('touchcancel',up,{passive:false});
   });
 
+  // === 4. BARREDOR DE CONTROLES NATIVOS ===
   (function(){
     function limpiar(){
       var wrap=document.getElementById('emulator-wrapper'); if(!wrap) return;
       var els=wrap.querySelectorAll('[class*="ejs"]');
       for(var i=0;i<els.length;i++){
         var c=String(els[i].className);
-        if(c.indexOf('button')>-1||c.indexOf('dpad')>-1||c.indexOf('control')>-1||
-           c.indexOf('volume')>-1){
+        if(c.indexOf('button')>-1||c.indexOf('dpad')>-1||c.indexOf('control')>-1||c.indexOf('volume')>-1){
           els[i].style.setProperty('display','none','important');
         }
       }
